@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: 20, maxWidth: 600, margin: "auto", fontFamily: "sans-serif" }}>
-      <h1>Hormone Lean Pro</h1>
+      <h1>Salty Sisters</h1>
 
       <h2>Nutrition</h2>
       <p>Calories: {totalCalories}/{calorieGoal}</p>
