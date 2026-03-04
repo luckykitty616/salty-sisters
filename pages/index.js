@@ -30,14 +30,6 @@ export default function Home() {
 
   const [history, setHistory] = useState([]);
 
-  const affirmations = [
-    "She is clothed with strength and dignity; she can laugh at the days to come. – Proverbs 31:25",
-    "This is not aging. This is evolving.",
-    "Hot flashes mean I’m still fire.",
-    "God is not finished with your story. This is a new chapter.",
-    "Midlife: when you finally stop apologizing and start thriving."
-  ];
-
   const randomAffirmation =
     affirmations[new Date().getDate() % affirmations.length];
 
