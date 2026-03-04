@@ -14,6 +14,7 @@ export default function Home() {
   const [weight, setWeight] = useState(104);
   const [waist, setWaist] = useState("");
   const [height, setHeight] = useState(60);
+  const [steps, setSteps] = useState("");
 
   const [energy, setEnergy] = useState(3);
   const [mood, setMood] = useState(3);
@@ -29,18 +30,25 @@ export default function Home() {
 
   const [history, setHistory] = useState([]);
 
+  const affirmations = [
+    "She is clothed with strength and dignity; she can laugh at the days to come. – Proverbs 31:25",
+    "This is not aging. This is evolving.",
+    "Hot flashes mean I’m still fire.",
+    "God is not finished with your story. This is a new chapter.",
+    "Midlife: when you finally stop apologizing and start thriving."
+  ];
+
+  const randomAffirmation =
+    affirmations[new Date().getDate() % affirmations.length];
+
   useEffect(() => {
     const saved = localStorage.getItem("hormoneHQ");
     if (saved) {
       const data = JSON.parse(saved);
-      Object.keys(data).forEach(key => {
-        if (data[key] !== undefined) {
-          if (typeof data[key] === "object" && data[key] !== null) return;
-        }
-      });
       setWeight(data.weight || 104);
       setWaist(data.waist || "");
       setHeight(data.height || 60);
+      setSteps(data.steps || "");
       setEnergy(data.energy || 3);
       setMood(data.mood || 3);
       setSleep(data.sleep || "");
@@ -58,6 +66,7 @@ export default function Home() {
         weight,
         waist,
         height,
+        steps,
         energy,
         mood,
         sleep,
@@ -71,6 +80,7 @@ export default function Home() {
     weight,
     waist,
     height,
+    steps,
     energy,
     mood,
     sleep,
@@ -82,10 +92,7 @@ export default function Home() {
 
   const addEntry = () => {
     if (!calories) return;
-    setEntries([
-      ...entries,
-      { calories, protein, carbs, fat, fiber }
-    ]);
+    setEntries([...entries, { calories, protein, carbs, fat, fiber }]);
     setCalories("");
     setProtein("");
     setCarbs("");
@@ -101,16 +108,11 @@ export default function Home() {
 
   const saveDay = () => {
     const today = new Date().toLocaleDateString();
-    setHistory([
-      ...history,
-      { date: today, weight, waist }
-    ]);
+    setHistory([...history, { date: today, weight, waist }]);
   };
 
   const total = key =>
     entries.reduce((sum, e) => sum + Number(e[key] || 0), 0);
-
-  const bmi = ((weight / (height * height)) * 703).toFixed(1);
 
   const styles = {
     background: darkMode ? "#0f172a" : "#f8fafc",
@@ -121,9 +123,11 @@ export default function Home() {
       borderRadius: 16,
       marginBottom: 20
     },
+    label: { display: "block", marginTop: 10 },
     input: {
       padding: 8,
-      margin: 6,
+      marginTop: 4,
+      width: "100%",
       borderRadius: 8,
       border: "1px solid #ccc"
     },
@@ -134,64 +138,69 @@ export default function Home() {
       cursor: "pointer",
       background: "#6366f1",
       color: "white",
-      margin: 6
+      marginTop: 10
     }
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 750, margin: "auto", ...styles }}>
-      <h1>Hormone Strength HQ</h1>
+    <div style={{ padding: 20, maxWidth: 800, margin: "auto", ...styles }}>
+      <h1>Hormone Strength & Grace HQ</h1>
 
-      <button
-        style={styles.button}
-        onClick={() => setDarkMode(!darkMode)}
-      >
+      <img
+        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+        alt="Beach"
+        style={{ width: "100%", borderRadius: 16, marginBottom: 20 }}
+      />
+
+      <div style={styles.card}>
+        <h3>Daily Encouragement</h3>
+        <p>{randomAffirmation}</p>
+      </div>
+
+      <button style={styles.button} onClick={() => setDarkMode(!darkMode)}>
         Toggle {darkMode ? "Light" : "Dark"} Mode
       </button>
 
       <div style={styles.card}>
         <h2>Body Metrics</h2>
-        <input style={styles.input} placeholder="Weight (lbs)" value={weight} onChange={e => setWeight(e.target.value)} />
-        <input style={styles.input} placeholder="Waist (inches)" value={waist} onChange={e => setWaist(e.target.value)} />
-        <input style={styles.input} placeholder="Height (inches)" value={height} onChange={e => setHeight(e.target.value)} />
-        <p>BMI: {bmi}</p>
+
+        <label style={styles.label}>Weight (lbs)</label>
+        <input style={styles.input} value={weight} onChange={e => setWeight(e.target.value)} />
+
+        <label style={styles.label}>Waist (inches)</label>
+        <input style={styles.input} value={waist} onChange={e => setWaist(e.target.value)} />
+
+        <label style={styles.label}>Height (inches)</label>
+        <input style={styles.input} value={height} onChange={e => setHeight(e.target.value)} />
+
+        <label style={styles.label}>Steps</label>
+        <input style={styles.input} value={steps} onChange={e => setSteps(e.target.value)} />
+
         <button style={styles.button} onClick={saveDay}>Save Today</button>
       </div>
 
       <div style={styles.card}>
-        <h2>Daily Wellness</h2>
-        <p>Energy (1–5)</p>
-        <input type="number" min="1" max="5" value={energy} onChange={e => setEnergy(e.target.value)} />
-        <p>Mood (1–5)</p>
-        <input type="number" min="1" max="5" value={mood} onChange={e => setMood(e.target.value)} />
-        <input style={styles.input} placeholder="Sleep (hours)" value={sleep} onChange={e => setSleep(e.target.value)} />
-        <input style={styles.input} placeholder="Water (oz)" value={water} onChange={e => setWater(e.target.value)} />
+        <h2>Core & Strength (8)</h2>
+        <ul>
+          <li>Dead Bugs – 3x12</li>
+          <li>Glute Bridges – 3x15</li>
+          <li>Pallof Press – 3x12</li>
+          <li>Heel Taps – 3x20</li>
+          <li>Step-Ups – 3x12</li>
+          <li>Goblet Squats – 3x12</li>
+          <li>Resistance Band Rows – 3x15</li>
+          <li>Incline Walking – 30 min</li>
+        </ul>
       </div>
 
       <div style={styles.card}>
-        <h2>Nutrition</h2>
-        <input style={styles.input} placeholder="Calories" value={calories} onChange={e => setCalories(e.target.value)} />
-        <input style={styles.input} placeholder="Protein (g)" value={protein} onChange={e => setProtein(e.target.value)} />
-        <input style={styles.input} placeholder="Carbs (g)" value={carbs} onChange={e => setCarbs(e.target.value)} />
-        <input style={styles.input} placeholder="Fat (g)" value={fat} onChange={e => setFat(e.target.value)} />
-        <input style={styles.input} placeholder="Fiber (g)" value={fiber} onChange={e => setFiber(e.target.value)} />
-        <button style={styles.button} onClick={addEntry}>+ Add Meal</button>
-
-        <h4>Daily Totals</h4>
-        <p>Calories: {total("calories")}</p>
-        <p>Protein: {total("protein")} g</p>
-        <p>Carbs: {total("carbs")} g</p>
-        <p>Fat: {total("fat")} g</p>
-        <p>Fiber: {total("fiber")} g</p>
-
-        {entries.map((e, i) => (
-          <div key={i}>
-            <small>
-              {e.calories} cal | {e.protein}g protein
-            </small>
-            <button onClick={() => removeEntry(i)}>x</button>
-          </div>
-        ))}
+        <h2>Calm & Cortisol Reset</h2>
+        <ul>
+          <li>4-7-8 Breathing – 5 min</li>
+          <li>10-min guided meditation</li>
+          <li>Evening gratitude journal</li>
+          <li>Sunset walk by the water</li>
+        </ul>
       </div>
 
       <div style={styles.card}>
@@ -205,27 +214,6 @@ export default function Home() {
             <Line type="monotone" dataKey="waist" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
-      </div>
-
-      <div style={styles.card}>
-        <h2>Strength + Core Plan</h2>
-        <ul>
-          <li>Dead Bugs – 3x12</li>
-          <li>Glute Bridges – 3x15</li>
-          <li>Pallof Press – 3x12</li>
-          <li>Step-Ups – 3x12</li>
-          <li>Incline Walk – 20–30 mins</li>
-        </ul>
-      </div>
-
-      <div style={styles.card}>
-        <h2>Calm + Cortisol Reset</h2>
-        <ul>
-          <li>4-7-8 Breathing – 5 mins</li>
-          <li>10-min body scan meditation</li>
-          <li>Gratitude journaling (3 wins)</li>
-          <li>Evening walk after dinner</li>
-        </ul>
       </div>
     </div>
   );
