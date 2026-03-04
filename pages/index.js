@@ -174,8 +174,10 @@ export default function Home() {
         <ul>
           <li>4-7-8 Breathing – 5 min</li>
           <li>10-min guided meditation</li>
-          <li>Evening gratitude journaling</li>
+          <li>Evening gratitude journaling / Bible study</li>
           <li>Sunset walk by the water</li>
+          <li>TaiChi / Yoga / Stretching</li>
+          <li>Diamond Art, Puzzle or Craft</li>
         </ul>
       </div>
 
