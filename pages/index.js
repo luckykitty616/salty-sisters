@@ -16,22 +16,24 @@ export default function Home() {
   const [height, setHeight] = useState(60);
   const [steps, setSteps] = useState("");
 
-  const [energy, setEnergy] = useState(3);
-  const [mood, setMood] = useState(3);
-  const [sleep, setSleep] = useState("");
-  const [water, setWater] = useState("");
-
   const [history, setHistory] = useState([]);
+
+  const [healthChecks, setHealthChecks] = useState({
+    dental1: false,
+    dental2: false,
+    mammogram: false,
+    gyn: false,
+    physical: false,
+    eye: false,
+    skin: false
+  });
 
   const encouragements = [
     "She is clothed with strength and dignity; she can laugh at the days to come. – Proverbs 31:25",
-    "Your future grandkids need a strong Nana. Move today.",
-    "Longevity isn’t luck. It’s steps, strength, and showing up.",
     "Your sister might already be walking. Just saying.",
-    "Hot flashes? Channel it into a power walk.",
-    "Midlife isn’t slowing down. It’s training for the next chapter.",
+    "Longevity is built in ordinary daily movement.",
     "Strong women age differently.",
-    "Lake days hit better when your hips and knees don’t hurt."
+    "Lake days feel better when your knees don’t ache."
   ];
 
   const todayMessage =
@@ -45,11 +47,8 @@ export default function Home() {
       setWaist(data.waist || "");
       setHeight(data.height || 60);
       setSteps(data.steps || "");
-      setEnergy(data.energy || 3);
-      setMood(data.mood || 3);
-      setSleep(data.sleep || "");
-      setWater(data.water || "");
       setHistory(data.history || []);
+      setHealthChecks(data.healthChecks || healthChecks);
       setDarkMode(data.darkMode ?? true);
     }
   }, []);
@@ -62,30 +61,20 @@ export default function Home() {
         waist,
         height,
         steps,
-        energy,
-        mood,
-        sleep,
-        water,
         history,
+        healthChecks,
         darkMode
       })
     );
-  }, [
-    weight,
-    waist,
-    height,
-    steps,
-    energy,
-    mood,
-    sleep,
-    water,
-    history,
-    darkMode
-  ]);
+  }, [weight, waist, height, steps, history, healthChecks, darkMode]);
 
   const saveDay = () => {
     const today = new Date().toLocaleDateString();
     setHistory([...history, { date: today, weight, waist }]);
+  };
+
+  const toggleCheck = key => {
+    setHealthChecks({ ...healthChecks, [key]: !healthChecks[key] });
   };
 
   const styles = {
@@ -170,14 +159,35 @@ export default function Home() {
       </div>
 
       <div style={styles.card}>
-        <h2>Calm & Cortisol Reset</h2>
+        <h2>Daily Human Connection</h2>
         <ul>
-          <li>4-7-8 Breathing – 5 min</li>
-          <li>10-min guided meditation</li>
-          <li>Evening gratitude journaling / Bible study</li>
-          <li>Sunset walk by the water</li>
-          <li>TaiChi / Yoga / Stretching</li>
-          <li>Diamond Art, Puzzle or Craft</li>
+          <li>Call a loved one</li>
+          <li>Play a game with spouse or friend</li>
+          <li>Send a text to someone you haven’t talked to recently</li>
+          <li>Invite someone for coffee or a walk</li>
+          <li>Write a handwritten note</li>
+        </ul>
+      </div>
+
+      <div style={styles.card}>
+        <h2>Health Reminders (12 Month Checklist)</h2>
+        <label><input type="checkbox" checked={healthChecks.dental1} onChange={() => toggleCheck("dental1")} /> Dental Exam 1</label><br/>
+        <label><input type="checkbox" checked={healthChecks.dental2} onChange={() => toggleCheck("dental2")} /> Dental Exam 2</label><br/>
+        <label><input type="checkbox" checked={healthChecks.mammogram} onChange={() => toggleCheck("mammogram")} /> Mammogram</label><br/>
+        <label><input type="checkbox" checked={healthChecks.gyn} onChange={() => toggleCheck("gyn")} /> Annual Gynecological Exam</label><br/>
+        <label><input type="checkbox" checked={healthChecks.physical} onChange={() => toggleCheck("physical")} /> General Physical / Labs</label><br/>
+        <label><input type="checkbox" checked={healthChecks.eye} onChange={() => toggleCheck("eye")} /> Eye Exam</label><br/>
+        <label><input type="checkbox" checked={healthChecks.skin} onChange={() => toggleCheck("skin")} /> Skin Exam</label>
+      </div>
+
+      <div style={styles.card}>
+        <h2>Declutter</h2>
+        <ul>
+          <li>Clear unused apps off phone</li>
+          <li>Delete unused photos/videos</li>
+          <li>Update passwords</li>
+          <li>Clean out one drawer</li>
+          <li>Unsubscribe from 5 emails</li>
         </ul>
       </div>
 
