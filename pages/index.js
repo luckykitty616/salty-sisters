@@ -21,20 +21,24 @@ export default function Home() {
   const [sleep, setSleep] = useState("");
   const [water, setWater] = useState("");
 
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
-  const [fiber, setFiber] = useState("");
-  const [entries, setEntries] = useState([]);
-
   const [history, setHistory] = useState([]);
 
-  const randomAffirmation =
-    affirmations[new Date().getDate() % affirmations.length];
+  const encouragements = [
+    "She is clothed with strength and dignity; she can laugh at the days to come. – Proverbs 31:25",
+    "Your future grandkids need a strong Nana. Move today.",
+    "Longevity isn’t luck. It’s steps, strength, and showing up.",
+    "Your sister might already be walking. Just saying.",
+    "Hot flashes? Channel it into a power walk.",
+    "Midlife isn’t slowing down. It’s training for the next chapter.",
+    "Strong women age differently.",
+    "Lake days hit better when your hips and knees don’t hurt."
+  ];
+
+  const todayMessage =
+    encouragements[new Date().getDate() % encouragements.length];
 
   useEffect(() => {
-    const saved = localStorage.getItem("hormoneHQ");
+    const saved = localStorage.getItem("saltySisters");
     if (saved) {
       const data = JSON.parse(saved);
       setWeight(data.weight || 104);
@@ -45,7 +49,6 @@ export default function Home() {
       setMood(data.mood || 3);
       setSleep(data.sleep || "");
       setWater(data.water || "");
-      setEntries(data.entries || []);
       setHistory(data.history || []);
       setDarkMode(data.darkMode ?? true);
     }
@@ -53,7 +56,7 @@ export default function Home() {
 
   useEffect(() => {
     localStorage.setItem(
-      "hormoneHQ",
+      "saltySisters",
       JSON.stringify({
         weight,
         waist,
@@ -63,7 +66,6 @@ export default function Home() {
         mood,
         sleep,
         water,
-        entries,
         history,
         darkMode
       })
@@ -77,34 +79,14 @@ export default function Home() {
     mood,
     sleep,
     water,
-    entries,
     history,
     darkMode
   ]);
-
-  const addEntry = () => {
-    if (!calories) return;
-    setEntries([...entries, { calories, protein, carbs, fat, fiber }]);
-    setCalories("");
-    setProtein("");
-    setCarbs("");
-    setFat("");
-    setFiber("");
-  };
-
-  const removeEntry = index => {
-    const updated = [...entries];
-    updated.splice(index, 1);
-    setEntries(updated);
-  };
 
   const saveDay = () => {
     const today = new Date().toLocaleDateString();
     setHistory([...history, { date: today, weight, waist }]);
   };
-
-  const total = key =>
-    entries.reduce((sum, e) => sum + Number(e[key] || 0), 0);
 
   const styles = {
     background: darkMode ? "#0f172a" : "#f8fafc",
@@ -115,7 +97,7 @@ export default function Home() {
       borderRadius: 16,
       marginBottom: 20
     },
-    label: { display: "block", marginTop: 10 },
+    label: { display: "block", marginTop: 12, fontWeight: "bold" },
     input: {
       padding: 8,
       marginTop: 4,
@@ -128,25 +110,25 @@ export default function Home() {
       borderRadius: 8,
       border: "none",
       cursor: "pointer",
-      background: "#6366f1",
+      background: "#14b8a6",
       color: "white",
-      marginTop: 10
+      marginTop: 12
     }
   };
 
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: "auto", ...styles }}>
-      <h1>Hormone Strength & Grace HQ</h1>
+      <h1>Salty Sisters 🌊</h1>
 
       <img
         src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-        alt="Beach"
+        alt="Coastal"
         style={{ width: "100%", borderRadius: 16, marginBottom: 20 }}
       />
 
       <div style={styles.card}>
         <h3>Daily Encouragement</h3>
-        <p>{randomAffirmation}</p>
+        <p style={{ fontSize: 18 }}>{todayMessage}</p>
       </div>
 
       <button style={styles.button} onClick={() => setDarkMode(!darkMode)}>
@@ -165,23 +147,25 @@ export default function Home() {
         <label style={styles.label}>Height (inches)</label>
         <input style={styles.input} value={height} onChange={e => setHeight(e.target.value)} />
 
-        <label style={styles.label}>Steps</label>
+        <label style={styles.label}>Steps Today</label>
         <input style={styles.input} value={steps} onChange={e => setSteps(e.target.value)} />
 
-        <button style={styles.button} onClick={saveDay}>Save Today</button>
+        <button style={styles.button} onClick={saveDay}>
+          Save Today
+        </button>
       </div>
 
       <div style={styles.card}>
-        <h2>Core & Strength (8)</h2>
+        <h2>Core & Strength</h2>
         <ul>
           <li>Dead Bugs – 3x12</li>
           <li>Glute Bridges – 3x15</li>
           <li>Pallof Press – 3x12</li>
           <li>Heel Taps – 3x20</li>
-          <li>Step-Ups – 3x12</li>
           <li>Goblet Squats – 3x12</li>
+          <li>Step-Ups – 3x12</li>
           <li>Resistance Band Rows – 3x15</li>
-          <li>Incline Walking – 30 min</li>
+          <li>Incline Walk – 30 mins</li>
         </ul>
       </div>
 
@@ -190,7 +174,7 @@ export default function Home() {
         <ul>
           <li>4-7-8 Breathing – 5 min</li>
           <li>10-min guided meditation</li>
-          <li>Evening gratitude journal</li>
+          <li>Evening gratitude journaling</li>
           <li>Sunset walk by the water</li>
         </ul>
       </div>
