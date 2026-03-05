@@ -1,243 +1,252 @@
-import { useState, useEffect } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend
-} from "recharts";
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom/client";
 
-export default function Home() {
-  const [darkMode, setDarkMode] = useState(true);
+function App() {
 
-  const [weight, setWeight] = useState(104);
-  const [waist, setWaist] = useState("");
-  const [height, setHeight] = useState(60);
-  const [steps, setSteps] = useState("");
+  const today = new Date().toISOString().slice(0,10);
 
-  const [bloodSugar, setBloodSugar] = useState("");
-  const [systolic, setSystolic] = useState("");
-  const [diastolic, setDiastolic] = useState("");
+  // -------------------------
+  // HEALTH DATA
+  // -------------------------
 
-  const [history, setHistory] = useState([]);
-  const [sisterData, setSisterData] = useState([]);
+  const [stepsLog, setStepsLog] = useState(() => JSON.parse(localStorage.getItem("stepsLog") || "{}"));
+  const [workoutLog, setWorkoutLog] = useState(() => JSON.parse(localStorage.getItem("workoutLog") || "{}"));
 
-  const [healthChecks, setHealthChecks] = useState({
-    dental1: false,
-    dental2: false,
-    mammogram: false,
-    gyn: false,
-    physical: false,
-    eye: false,
-    skin: false
-  });
+  const [weight, setWeight] = useState(localStorage.getItem("weight") || "");
+  const [height, setHeight] = useState(localStorage.getItem("height") || "");
+  const [bloodPressure, setBloodPressure] = useState(localStorage.getItem("bp") || "");
+  const [bloodSugar, setBloodSugar] = useState(localStorage.getItem("sugar") || "");
 
-  const encouragements = [
-    "She is clothed with strength and dignity.",
-    "Your sister might already be walking.",
-    "Longevity is built daily.",
-    "Strong women age differently.",
-    "Lake days feel better when knees don’t ache."
-  ];
+  const [messageBoard, setMessageBoard] = useState(() => JSON.parse(localStorage.getItem("messages") || "[]"));
 
-  const todayMessage =
-    encouragements[new Date().getDate() % encouragements.length];
+  // -------------------------
+  // TEAM CHALLENGE
+  // -------------------------
+
+  const [team, setTeam] = useState(localStorage.getItem("team") || "");
+
+  const lakeTotal = 42000;
+  const beachTotal = 38500;
+
+  // -------------------------
+  // WEATHER
+  // -------------------------
+
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("saltySistersFull");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setWeight(data.weight || 104);
-      setWaist(data.waist || "");
-      setHeight(data.height || 60);
-      setSteps(data.steps || "");
-      setBloodSugar(data.bloodSugar || "");
-      setSystolic(data.systolic || "");
-      setDiastolic(data.diastolic || "");
-      setHistory(data.history || []);
-      setSisterData(data.sisterData || []);
-      setHealthChecks(data.healthChecks || healthChecks);
-      setDarkMode(data.darkMode ?? true);
-    }
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=39.96&longitude=-83.00&current_weather=true")
+      .then(res => res.json())
+      .then(data => setWeather(data.current_weather));
   }, []);
 
+  // -------------------------
+  // SAVE DATA
+  // -------------------------
+
+  useEffect(()=>{localStorage.setItem("stepsLog",JSON.stringify(stepsLog))},[stepsLog]);
+  useEffect(()=>{localStorage.setItem("workoutLog",JSON.stringify(workoutLog))},[workoutLog]);
+  useEffect(()=>{localStorage.setItem("messages",JSON.stringify(messageBoard))},[messageBoard]);
+
+  useEffect(()=>{localStorage.setItem("weight",weight)},[weight]);
+  useEffect(()=>{localStorage.setItem("height",height)},[height]);
+  useEffect(()=>{localStorage.setItem("bp",bloodPressure)},[bloodPressure]);
+  useEffect(()=>{localStorage.setItem("sugar",bloodSugar)},[bloodSugar]);
+  useEffect(()=>{localStorage.setItem("team",team)},[team]);
+
+  // -------------------------
+  // CALCULATIONS
+  // -------------------------
+
+  const streak = Object.keys(workoutLog).length;
+
+  const bmi = weight && height
+    ? (weight / (height * height) * 703).toFixed(1)
+    : null;
+
+  const longevityScore =
+    (streak * 5) +
+    (stepsLog[today] ? 10 : 0) +
+    (workoutLog[today] ? 15 : 0) +
+    (team ? 5 : 0);
+
+  // -------------------------
+  // REMINDERS
+  // -------------------------
+
   useEffect(() => {
-    localStorage.setItem(
-      "saltySistersFull",
-      JSON.stringify({
-        weight,
-        waist,
-        height,
-        steps,
-        bloodSugar,
-        systolic,
-        diastolic,
-        history,
-        sisterData,
-        healthChecks,
-        darkMode
-      })
-    );
-  }, [
-    weight,
-    waist,
-    height,
-    steps,
-    bloodSugar,
-    systolic,
-    diastolic,
-    history,
-    sisterData,
-    healthChecks,
-    darkMode
-  ]);
 
-  const bmi =
-    height && weight
-      ? ((weight / (height * height)) * 703).toFixed(1)
-      : null;
+    const hour = new Date().getHours();
 
-  const bmiColor =
-    bmi < 18.5
-      ? "#60a5fa"
-      : bmi < 25
-      ? "#22c55e"
-      : bmi < 30
-      ? "#f59e0b"
-      : "#ef4444";
-
-  const longevityScore = Math.min(
-    100,
-    Math.round(
-      (steps / 10000) * 40 +
-        (bmi && bmi < 25 ? 20 : 10) +
-        (bloodSugar && bloodSugar < 100 ? 20 : 10) +
-        (systolic && systolic < 120 ? 20 : 10)
-    )
-  );
-
-  const saveDay = () => {
-    const today = new Date().toLocaleDateString();
-    const newEntry = {
-      date: today,
-      weight: Number(weight),
-      waist: Number(waist),
-      bmi: Number(bmi),
-      steps: Number(steps)
-    };
-    setHistory([...history, newEntry]);
-    setSisterData([...sisterData, newEntry]);
-  };
-
-  const toggleCheck = key => {
-    setHealthChecks({ ...healthChecks, [key]: !healthChecks[key] });
-  };
-
-  const styles = {
-    background: darkMode ? "#0f172a" : "#f8fafc",
-    color: darkMode ? "white" : "#111",
-    card: {
-      background: darkMode ? "#1e293b" : "white",
-      padding: 20,
-      borderRadius: 16,
-      marginBottom: 20
-    },
-    input: {
-      padding: 8,
-      marginTop: 4,
-      width: "100%",
-      borderRadius: 8,
-      border: "1px solid #ccc"
-    },
-    button: {
-      padding: "8px 14px",
-      borderRadius: 8,
-      border: "none",
-      cursor: "pointer",
-      background: "#14b8a6",
-      color: "white",
-      marginTop: 12
+    if(hour === 9){
+      alert("🌞 Morning reminder: Log your health stats today!");
     }
-  };
+
+    if(hour === 18){
+      alert("🏃 Evening reminder: Time for movement!");
+    }
+
+  },[]);
+
+  // -------------------------
+  // FUNCTIONS
+  // -------------------------
+
+  function addSteps(){
+    const steps = prompt("Enter today's steps");
+    if(!steps) return;
+
+    setStepsLog({
+      ...stepsLog,
+      [today]: Number(steps)
+    });
+  }
+
+  function logWorkout(){
+    setWorkoutLog({
+      ...workoutLog,
+      [today]: true
+    });
+  }
+
+  function postMessage(){
+    const msg = prompt("Share encouragement with your sisters");
+    if(!msg) return;
+
+    setMessageBoard([
+      {text: msg, date: today},
+      ...messageBoard
+    ]);
+  }
+
+  // -------------------------
+  // UI
+  // -------------------------
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "auto", ...styles }}>
-      <h1>Salty Sisters 🌊</h1>
 
-      <button style={styles.button} onClick={() => setDarkMode(!darkMode)}>
-        Toggle {darkMode ? "Light" : "Dark"} Mode
-      </button>
+  <div style={{fontFamily:"sans-serif",padding:"20px",maxWidth:"900px",margin:"auto"}}>
 
-      <div style={styles.card}>
-        <h3>Daily Encouragement</h3>
-        <p>{todayMessage}</p>
-      </div>
+  <h1>🌊 Salty Sisters Wellness</h1>
 
-      <div style={styles.card}>
-        <h2>Body Metrics</h2>
+  <h3>Longevity Score: {longevityScore}</h3>
 
-        <input style={styles.input} placeholder="Weight (lbs)" value={weight} onChange={e => setWeight(e.target.value)} />
-        <input style={styles.input} placeholder="Waist (inches)" value={waist} onChange={e => setWaist(e.target.value)} />
-        <input style={styles.input} placeholder="Height (inches)" value={height} onChange={e => setHeight(e.target.value)} />
-        <input style={styles.input} placeholder="Steps Today" value={steps} onChange={e => setSteps(e.target.value)} />
+  {/* WEATHER */}
 
-        {bmi && (
-          <div style={{ marginTop: 15 }}>
-            <strong>BMI: </strong>
-            <span style={{ color: bmiColor, fontSize: 22 }}>{bmi}</span>
-          </div>
-        )}
+  <div style={{background:"#e8f4ff",padding:"15px",borderRadius:"10px",marginBottom:"20px"}}>
+    <h3>☀ Weather</h3>
 
-        <button style={styles.button} onClick={saveDay}>
-          Save Today
-        </button>
-      </div>
+    {weather ? (
+      <p>
+        Temperature: {weather.temperature}°C  
+        <br/>
+        Wind: {weather.windspeed} km/h
+      </p>
+    ) : "Loading weather..."}
+  </div>
 
-      <div style={styles.card}>
-        <h2>Blood Sugar</h2>
-        <input style={styles.input} placeholder="Fasting Blood Sugar" value={bloodSugar} onChange={e => setBloodSugar(e.target.value)} />
-      </div>
 
-      <div style={styles.card}>
-        <h2>Blood Pressure</h2>
-        <input style={styles.input} placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
-        <input style={styles.input} placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
-      </div>
+  {/* HEALTH TRACKING */}
 
-      <div style={styles.card}>
-        <h2>Longevity Score</h2>
-        <div style={{ fontSize: 40, fontWeight: "bold" }}>
-          {longevityScore} / 100
-        </div>
-      </div>
+  <div style={{background:"#f4f4f4",padding:"15px",borderRadius:"10px",marginBottom:"20px"}}>
 
-      <div style={styles.card}>
-        <h2>Progress Trends</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={history}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="weight" strokeWidth={3} />
-            <Line type="monotone" dataKey="waist" strokeWidth={3} />
-            <Line type="monotone" dataKey="bmi" strokeWidth={3} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+  <h3>Health Stats</h3>
 
-      <div style={styles.card}>
-        <h2>Sister Dashboard</h2>
-        {sisterData.map((entry, i) => (
-          <div key={i} style={{ marginBottom: 10 }}>
-            {entry.date} — Weight: {entry.weight} | BMI: {entry.bmi}
-          </div>
-        ))}
-      </div>
-    </div>
+  <input placeholder="Weight (lbs)" value={weight} onChange={e=>setWeight(e.target.value)}/>
+  <br/>
+
+  <input placeholder="Height (in)" value={height} onChange={e=>setHeight(e.target.value)}/>
+  <br/>
+
+  <input placeholder="Blood Pressure" value={bloodPressure} onChange={e=>setBloodPressure(e.target.value)}/>
+  <br/>
+
+  <input placeholder="Blood Sugar" value={bloodSugar} onChange={e=>setBloodSugar(e.target.value)}/>
+
+  {bmi && <p>BMI: {bmi}</p>}
+
+  </div>
+
+
+  {/* MOVEMENT */}
+
+  <div style={{background:"#fff3e6",padding:"15px",borderRadius:"10px",marginBottom:"20px"}}>
+
+  <h3>Movement</h3>
+
+  <button onClick={addSteps}>Log Steps</button>
+
+  <button onClick={logWorkout} style={{marginLeft:"10px"}}>
+    Log Workout
+  </button>
+
+  <p>Today's Steps: {stepsLog[today] || 0}</p>
+
+  <p>Workout Streak: {streak}</p>
+
+  </div>
+
+
+  {/* TEAM CHALLENGE */}
+
+  <div style={{background:"#dff7ff",padding:"15px",borderRadius:"10px",marginBottom:"20px"}}>
+
+  <h3>🏖 Lake vs Beach Challenge</h3>
+
+  {!team && (
+    <>
+      <button onClick={()=>setTeam("lake")}>🌊 Team Lake</button>
+      <button onClick={()=>setTeam("beach")} style={{marginLeft:"10px"}}>🏝 Team Beach</button>
+    </>
+  )}
+
+  {team && (
+    <>
+      <p>You are on Team {team === "lake" ? "Lake 🌊" : "Beach 🏝"}</p>
+
+      <p>Lake Steps: {lakeTotal}</p>
+      <p>Beach Steps: {beachTotal}</p>
+    </>
+  )}
+
+  </div>
+
+
+  {/* CONNECTION */}
+
+  <div style={{background:"#f0e6ff",padding:"15px",borderRadius:"10px",marginBottom:"20px"}}>
+
+  <h3>💬 Sister Encouragement</h3>
+
+  <button onClick={postMessage}>Post Message</button>
+
+  {messageBoard.map((m,i)=>(
+    <p key={i}>
+      {m.text} — {m.date}
+    </p>
+  ))}
+
+  </div>
+
+
+  {/* ENCOURAGEMENT */}
+
+  <div style={{background:"#eaffea",padding:"15px",borderRadius:"10px"}}>
+
+  <h3>✨ Daily Encouragement</h3>
+
+  <p>
+  "Consistency beats intensity. Move your body, calm your mind, and keep showing up."
+  </p>
+
+  </div>
+
+
+  </div>
+
   );
+
 }
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
