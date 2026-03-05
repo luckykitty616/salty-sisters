@@ -5,7 +5,9 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend
 } from "recharts";
 
 export default function Home() {
@@ -16,7 +18,12 @@ export default function Home() {
   const [height, setHeight] = useState(60);
   const [steps, setSteps] = useState("");
 
+  const [bloodSugar, setBloodSugar] = useState("");
+  const [systolic, setSystolic] = useState("");
+  const [diastolic, setDiastolic] = useState("");
+
   const [history, setHistory] = useState([]);
+  const [sisterData, setSisterData] = useState([]);
 
   const [healthChecks, setHealthChecks] = useState({
     dental1: false,
@@ -29,25 +36,29 @@ export default function Home() {
   });
 
   const encouragements = [
-    "She is clothed with strength and dignity; she can laugh at the days to come. – Proverbs 31:25",
-    "Your sister might already be walking. Just saying.",
-    "Longevity is built in ordinary daily movement.",
+    "She is clothed with strength and dignity.",
+    "Your sister might already be walking.",
+    "Longevity is built daily.",
     "Strong women age differently.",
-    "Lake days feel better when your knees don’t ache."
+    "Lake days feel better when knees don’t ache."
   ];
 
   const todayMessage =
     encouragements[new Date().getDate() % encouragements.length];
 
   useEffect(() => {
-    const saved = localStorage.getItem("saltySisters");
+    const saved = localStorage.getItem("saltySistersFull");
     if (saved) {
       const data = JSON.parse(saved);
       setWeight(data.weight || 104);
       setWaist(data.waist || "");
       setHeight(data.height || 60);
       setSteps(data.steps || "");
+      setBloodSugar(data.bloodSugar || "");
+      setSystolic(data.systolic || "");
+      setDiastolic(data.diastolic || "");
       setHistory(data.history || []);
+      setSisterData(data.sisterData || []);
       setHealthChecks(data.healthChecks || healthChecks);
       setDarkMode(data.darkMode ?? true);
     }
@@ -55,22 +66,70 @@ export default function Home() {
 
   useEffect(() => {
     localStorage.setItem(
-      "saltySisters",
+      "saltySistersFull",
       JSON.stringify({
         weight,
         waist,
         height,
         steps,
+        bloodSugar,
+        systolic,
+        diastolic,
         history,
+        sisterData,
         healthChecks,
         darkMode
       })
     );
-  }, [weight, waist, height, steps, history, healthChecks, darkMode]);
+  }, [
+    weight,
+    waist,
+    height,
+    steps,
+    bloodSugar,
+    systolic,
+    diastolic,
+    history,
+    sisterData,
+    healthChecks,
+    darkMode
+  ]);
+
+  const bmi =
+    height && weight
+      ? ((weight / (height * height)) * 703).toFixed(1)
+      : null;
+
+  const bmiColor =
+    bmi < 18.5
+      ? "#60a5fa"
+      : bmi < 25
+      ? "#22c55e"
+      : bmi < 30
+      ? "#f59e0b"
+      : "#ef4444";
+
+  const longevityScore = Math.min(
+    100,
+    Math.round(
+      (steps / 10000) * 40 +
+        (bmi && bmi < 25 ? 20 : 10) +
+        (bloodSugar && bloodSugar < 100 ? 20 : 10) +
+        (systolic && systolic < 120 ? 20 : 10)
+    )
+  );
 
   const saveDay = () => {
     const today = new Date().toLocaleDateString();
-    setHistory([...history, { date: today, weight, waist }]);
+    const newEntry = {
+      date: today,
+      weight: Number(weight),
+      waist: Number(waist),
+      bmi: Number(bmi),
+      steps: Number(steps)
+    };
+    setHistory([...history, newEntry]);
+    setSisterData([...sisterData, newEntry]);
   };
 
   const toggleCheck = key => {
@@ -86,7 +145,6 @@ export default function Home() {
       borderRadius: 16,
       marginBottom: 20
     },
-    label: { display: "block", marginTop: 12, fontWeight: "bold" },
     input: {
       padding: 8,
       marginTop: 4,
@@ -106,38 +164,32 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: "auto", ...styles }}>
+    <div style={{ padding: 20, maxWidth: 900, margin: "auto", ...styles }}>
       <h1>Salty Sisters 🌊</h1>
-
-      <img
-        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-        alt="Coastal"
-        style={{ width: "100%", borderRadius: 16, marginBottom: 20 }}
-      />
-
-      <div style={styles.card}>
-        <h3>Daily Encouragement</h3>
-        <p style={{ fontSize: 18 }}>{todayMessage}</p>
-      </div>
 
       <button style={styles.button} onClick={() => setDarkMode(!darkMode)}>
         Toggle {darkMode ? "Light" : "Dark"} Mode
       </button>
 
       <div style={styles.card}>
+        <h3>Daily Encouragement</h3>
+        <p>{todayMessage}</p>
+      </div>
+
+      <div style={styles.card}>
         <h2>Body Metrics</h2>
 
-        <label style={styles.label}>Weight (lbs)</label>
-        <input style={styles.input} value={weight} onChange={e => setWeight(e.target.value)} />
+        <input style={styles.input} placeholder="Weight (lbs)" value={weight} onChange={e => setWeight(e.target.value)} />
+        <input style={styles.input} placeholder="Waist (inches)" value={waist} onChange={e => setWaist(e.target.value)} />
+        <input style={styles.input} placeholder="Height (inches)" value={height} onChange={e => setHeight(e.target.value)} />
+        <input style={styles.input} placeholder="Steps Today" value={steps} onChange={e => setSteps(e.target.value)} />
 
-        <label style={styles.label}>Waist (inches)</label>
-        <input style={styles.input} value={waist} onChange={e => setWaist(e.target.value)} />
-
-        <label style={styles.label}>Height (inches)</label>
-        <input style={styles.input} value={height} onChange={e => setHeight(e.target.value)} />
-
-        <label style={styles.label}>Steps Today</label>
-        <input style={styles.input} value={steps} onChange={e => setSteps(e.target.value)} />
+        {bmi && (
+          <div style={{ marginTop: 15 }}>
+            <strong>BMI: </strong>
+            <span style={{ color: bmiColor, fontSize: 22 }}>{bmi}</span>
+          </div>
+        )}
 
         <button style={styles.button} onClick={saveDay}>
           Save Today
@@ -145,63 +197,46 @@ export default function Home() {
       </div>
 
       <div style={styles.card}>
-        <h2>Core & Strength</h2>
-        <ul>
-          <li>Dead Bugs – 3x12</li>
-          <li>Glute Bridges – 3x15</li>
-          <li>Pallof Press – 3x12</li>
-          <li>Heel Taps – 3x20</li>
-          <li>Goblet Squats – 3x12</li>
-          <li>Step-Ups – 3x12</li>
-          <li>Resistance Band Rows – 3x15</li>
-          <li>Incline Walk – 30 mins</li>
-        </ul>
+        <h2>Blood Sugar</h2>
+        <input style={styles.input} placeholder="Fasting Blood Sugar" value={bloodSugar} onChange={e => setBloodSugar(e.target.value)} />
       </div>
 
       <div style={styles.card}>
-        <h2>Daily Human Connection</h2>
-        <ul>
-          <li>Call a loved one</li>
-          <li>Play a game with spouse or friend</li>
-          <li>Send a text to someone you haven’t talked to recently</li>
-          <li>Invite someone for coffee or a walk</li>
-          <li>Write a handwritten note</li>
-        </ul>
+        <h2>Blood Pressure</h2>
+        <input style={styles.input} placeholder="Systolic" value={systolic} onChange={e => setSystolic(e.target.value)} />
+        <input style={styles.input} placeholder="Diastolic" value={diastolic} onChange={e => setDiastolic(e.target.value)} />
       </div>
 
       <div style={styles.card}>
-        <h2>Health Reminders (12 Month Checklist)</h2>
-        <label><input type="checkbox" checked={healthChecks.dental1} onChange={() => toggleCheck("dental1")} /> Dental Exam 1</label><br/>
-        <label><input type="checkbox" checked={healthChecks.dental2} onChange={() => toggleCheck("dental2")} /> Dental Exam 2</label><br/>
-        <label><input type="checkbox" checked={healthChecks.mammogram} onChange={() => toggleCheck("mammogram")} /> Mammogram</label><br/>
-        <label><input type="checkbox" checked={healthChecks.gyn} onChange={() => toggleCheck("gyn")} /> Annual Gynecological Exam</label><br/>
-        <label><input type="checkbox" checked={healthChecks.physical} onChange={() => toggleCheck("physical")} /> General Physical / Labs</label><br/>
-        <label><input type="checkbox" checked={healthChecks.eye} onChange={() => toggleCheck("eye")} /> Eye Exam</label><br/>
-        <label><input type="checkbox" checked={healthChecks.skin} onChange={() => toggleCheck("skin")} /> Skin Exam</label>
-      </div>
-
-      <div style={styles.card}>
-        <h2>Declutter</h2>
-        <ul>
-          <li>Clear unused apps off phone</li>
-          <li>Delete unused photos/videos</li>
-          <li>Update passwords</li>
-          <li>Clean out one drawer</li>
-          <li>Unsubscribe from 5 emails</li>
-        </ul>
+        <h2>Longevity Score</h2>
+        <div style={{ fontSize: 40, fontWeight: "bold" }}>
+          {longevityScore} / 100
+        </div>
       </div>
 
       <div style={styles.card}>
         <h2>Progress Trends</h2>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={history}>
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="weight" strokeWidth={2} />
-            <Line type="monotone" dataKey="waist" strokeWidth={2} />
+            <Legend />
+            <Line type="monotone" dataKey="weight" strokeWidth={3} />
+            <Line type="monotone" dataKey="waist" strokeWidth={3} />
+            <Line type="monotone" dataKey="bmi" strokeWidth={3} />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      <div style={styles.card}>
+        <h2>Sister Dashboard</h2>
+        {sisterData.map((entry, i) => (
+          <div key={i} style={{ marginBottom: 10 }}>
+            {entry.date} — Weight: {entry.weight} | BMI: {entry.bmi}
+          </div>
+        ))}
       </div>
     </div>
   );
