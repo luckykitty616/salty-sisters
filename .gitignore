@@ -1,31 +1,5 @@
-# dependencies
-node_modules/
-
-# Next.js build files
-.next/
-out/
-
-# environment variables
+node_modules
+.next
+out
 .env
-.env.local
-.env.development
-.env.production
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS files
 .DS_Store
-Thumbs.db
-
-# Firebase cache
-.firebase/
-
-# Vercel / deployment artifacts
-.vercel/
-
-# editor files
-.vscode/
-.idea/
