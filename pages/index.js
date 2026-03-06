@@ -1,7 +1,7 @@
-import Encouragement from "../components/Encouragement";
 import BodyMetrics from "../components/BodyMetrics";
 import HealthTrackers from "../components/HealthTrackers";
 import ExerciseSection from "../components/ExerciseSection";
+import Encouragement from "../components/Encouragement";
 import ConnectionIdeas from "../components/ConnectionIdeas";
 import DeclutterIdeas from "../components/DeclutterIdeas";
 import HealthReminders from "../components/HealthReminders";
@@ -11,9 +11,9 @@ import TrendsChart from "../components/TrendsChart";
 
 export default function Home() {
   return (
-    <div style={{padding:20,maxWidth:900,margin:"auto"}}>
-
-      <h1>Salty Sisters 🌊</h1>
+    <div style={{ maxWidth: 900, margin: "auto", padding: 20 }}>
+      
+      <h1>🌊 Salty Sisters</h1>
 
       <WeatherDashboard />
 
