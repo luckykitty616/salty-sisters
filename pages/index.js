@@ -12,6 +12,7 @@ import TrendsChart from "../components/TrendsChart";
 export default function Home() {
   return (
     <div style={{padding:20,maxWidth:900,margin:"auto"}}>
+
       <h1>Salty Sisters 🌊</h1>
 
       <WeatherDashboard />
@@ -33,6 +34,7 @@ export default function Home() {
       <SisterDashboard />
 
       <TrendsChart />
+
     </div>
   );
 }
